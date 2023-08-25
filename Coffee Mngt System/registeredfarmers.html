@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>All Farmers</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Additional custom styles */
+    body {
+      font-family: Arial, sans-serif;
+    }
+    
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    #searchForm {
+      margin-bottom: 20px;
+    }
+
+    #farmersTable {
+      width: 100%;
+    }
+
+    #farmersTable th,
+    #farmersTable td {
+      padding: 8px;
+      vertical-align: middle;
+    }
+
+    #farmersTable th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    #farmersTable tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    #searchInput {
+      width: 200px;
+    }
+
+    #searchButton,
+    #printButton {
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">
+      <img src="/logo2.png" width="50" height="50" class="d-inline-block align-top" alt="Logo">
+    </a>
+    <a class="navbar-brand" href="#">Coffee Dashboard</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="landingpage.html">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="dashboard.html">Dashboard</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="register.html">Register</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="record.html">Transact</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="registeredfarmers.html">Farmers</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="editfarmersdetails.html">Farmer Edit</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="statement.html">Find Statement</a>
+            </li>
+        </ul>
+    </div>
+  </nav>
+  <div class="container">
+    <h1>All Farmers</h1>
+
+    <form id="searchForm">
+      <div class="form-group">
+        <label for="searchInput">Search:</label>
+        <div class="input-group">
+          <input type="text" id="searchInput" class="form-control">
+          <div class="input-group-append">
+            <button type="button" id="searchButton" class="btn btn-success">Search</button>
+            <button type="button" id="printButton" class="btn btn-primary">Print</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <table id="farmersTable" class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Account Number</th>
+          <th>Name</th>
+          <th>Farmer ID</th>
+          <th>Total Coffee</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Table rows will be dynamically generated using JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+  <script>
+    // JavaScript code for the all farmers page
+    // Add your JavaScript code here
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAJ5Ny4cGhDRD9MB9as2_iGqlX7weecr_c",
+  authDomain: "knec-project-2023.firebaseapp.com",
+  databaseURL: "https://knec-project-2023-default-rtdb.firebaseio.com",
+  projectId: "knec-project-2023",
+  storageBucket: "knec-project-2023.appspot.com",
+  messagingSenderId: "127489664392",
+  appId: "1:127489664392:web:7509fe724fbf7da61a463d",
+  measurementId: "G-52NF6HECW5"
+};
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Function to generate the table rows
+    function generateTableRows(farmers) {
+      const tbody = document.querySelector("#farmersTable tbody");
+      tbody.innerHTML = "";
+
+      farmers.forEach(farmer => {
+        const row = document.createElement("tr");
+
+        const accountNumberCell = document.createElement("td");
+        accountNumberCell.textContent = farmer.accountNumber;
+        row.appendChild(accountNumberCell);
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = farmer.name;
+        row.appendChild(nameCell);
+
+        const farmerIdCell = document.createElement("td");
+        farmerIdCell.textContent = farmer.farmerId;
+        row.appendChild(farmerIdCell);
+
+        const totalCoffeeCell = document.createElement("td");
+        totalCoffeeCell.textContent = farmer.totalCoffee;
+        row.appendChild(totalCoffeeCell);
+
+        tbody.appendChild(row);
+      });
+    }
+
+    // Function to fetch and display all farmers from the database
+    function displayAllFarmers() {
+      database.ref("farmers").once("value", function(snapshot) {
+        const farmers = [];
+        snapshot.forEach(function(childSnapshot) {
+          const farmer = childSnapshot.val();
+          farmers.push(farmer);
+        });
+
+        generateTableRows(farmers);
+      });
+    }
+
+    // Function to search for farmers by name, account number, or ID
+    function searchFarmers(searchTerm) {
+      const searchResults = [];
+
+      database.ref("farmers").once("value", function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+          const farmer = childSnapshot.val();
+          if (
+            farmer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            farmer.accountNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            farmer.farmerId.toLowerCase().includes(searchTerm.toLowerCase())
+          ) {
+            searchResults.push(farmer);
+          }
+        });
+
+        generateTableRows(searchResults);
+      });
+    }
+
+    // Event listener for search button click
+    const searchButton = document.getElementById("searchButton");
+    searchButton.addEventListener("click", function() {
+      const searchInput = document.getElementById("searchInput").value;
+      if (searchInput.trim() !== "") {
+        searchFarmers(searchInput);
+      } else {
+        displayAllFarmers();
+      }
+    });
+
+    // Event listener for print button click
+    const printButton = document.getElementById("printButton");
+    printButton.addEventListener("click", function() {
+      window.print();
+    });
+
+    // Initial display of all farmers
+    displayAllFarmers();
+  </script>>
+</body>
+</html>

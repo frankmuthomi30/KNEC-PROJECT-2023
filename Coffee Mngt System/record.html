@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coffee Management System - Farmer Transactions</title>
+  <!-- Include Bootstrap CSS link here -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    form {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    input, select {
+      margin-bottom: 10px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    #receipt {
+      display: none;
+      margin-top: 30px;
+      border: 1px solid #333;
+      padding: 20px;
+      font-family: "Courier New", monospace;
+      background-color: #f8f9fa;
+    }
+    
+    #receipt p {
+      margin: 5px 0;
+    }
+    
+    #printBtn {
+      margin-top: 20px;
+    }  </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+      <a class="navbar-brand" href="#">
+        <img src="/logo2.png" width="50" height="50" class="d-inline-block align-top" alt="Logo">
+      </a>
+        <a class="navbar-brand" href="#">Coffee Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="landingpage.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard.html">Dashboard</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="register.html">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="record.html">Transact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="registeredfarmers.html">Farmers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="editfarmersdetails.html">Farmer Edit</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="statement.html">Find Statement</a>
+                </li>
+            </ul>
+        </div>
+      </nav>
+  <div class="container mt-5">
+    <h1 class="mb-4">Farmer Transactions</h1>
+
+    <form id="transactionForm">
+      <div class="form-group">
+        <label for="farmerId">Farmer ID:</label>
+        <input type="text" class="form-control" id="farmerId" required>
+      </div>
+
+      <div class="form-group">
+        <label for="coffeeType">Coffee Type:</label>
+        <select class="form-control" id="coffeeType" required>
+          <option value="cherry1">Cherry 1</option>
+          <option value="cherry2">Cherry 2</option>
+          <option value="mbuni">Mbuni</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="amount">Amount (kg):</label>
+        <input type="number" class="form-control" id="amount" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Record Transaction</button>
+    </form>
+
+    <h2 class="mt-4">Receipt</h2>
+    <div id="receipt" class="border p-3">
+      <h3>Receipt</h3>
+      <p id="factoryName"><strong>Factory Name:</strong> Thiriku Coffee Society</p>
+      <p id="receiptTitle"><strong>Receipt</strong></p>
+      <p id="farmerName"></p>
+      <p id="farmerId"></p>
+      <p id="coffeeType"></p>
+      <p id="amount"></p>
+      <p id="date"></p>
+      <p id="totalAmount"></p>
+      <p id="amountBroughtToday"></p>
+    </div>
+
+    <button id="printBtn" class="btn btn-secondary mt-3" onclick="window.print()">Print Receipt</button>
+  </div>
+
+  <!-- Include Bootstrap JS and jQuery links here -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <!-- Include Firebase scripts and your JavaScript code -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+  <script>
+    // JavaScript code for farmer transactions page
+    // Add your JavaScript code here
+    
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+  apiKey: "AIzaSyAJ5Ny4cGhDRD9MB9as2_iGqlX7weecr_c",
+  authDomain: "knec-project-2023.firebaseapp.com",
+  databaseURL: "https://knec-project-2023-default-rtdb.firebaseio.com",
+  projectId: "knec-project-2023",
+  storageBucket: "knec-project-2023.appspot.com",
+  messagingSenderId: "127489664392",
+  appId: "1:127489664392:web:7509fe724fbf7da61a463d",
+  measurementId: "G-52NF6HECW5"
+};
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    function getFormattedDateTime() {
+      var currentDateTime = new Date();
+      var options = { dateStyle: "medium", timeStyle: "short" };
+      return currentDateTime.toLocaleString(undefined, options);
+    }
+    
+    document.getElementById("transactionForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+    
+      var farmerId = document.getElementById("farmerId").value.trim(); // Trim any leading/trailing spaces
+      var coffeeType = document.getElementById("coffeeType").value;
+      var amount = document.getElementById("amount").value;
+    
+      database.ref("farmers/" + farmerId).once("value", function(snapshot) {
+        var farmer = snapshot.val();
+    
+        if (farmer) {
+          // Confirm farmer's ID
+          var confirmMessage = "Is this the farmer?\n\nFarmer ID: " + farmer.farmerId + "\nName: " + farmer.name;
+          var isConfirmed = confirm(confirmMessage);
+    
+          if (!isConfirmed) {
+            return;
+          }
+    
+          var farmerName = farmer.name;
+          var currentDateTime = getFormattedDateTime();
+    
+          farmer.transactions = farmer.transactions || [];
+          var transaction = {
+            coffeeType: coffeeType,
+            amount: amount,
+            date: currentDateTime
+          };
+          farmer.transactions.push(transaction);
+    
+          var factoryName = document.getElementById("factoryName");
+          var receiptTitle = document.getElementById("receiptTitle");
+          var farmerNameElement = document.getElementById("farmerName");
+          var farmerIdElement = document.getElementById("farmerId");
+          var coffeeTypeElement = document.getElementById("coffeeType");
+          var amountElement = document.getElementById("amount");
+          var dateElement = document.getElementById("date");
+          var totalAmountElement = document.getElementById("totalAmount");
+          var amountBroughtTodayElement = document.getElementById("amountBroughtToday");
+    
+          factoryName.innerHTML = "Factory Name: Thiriku Coffee Society";
+          receiptTitle.innerHTML = "Receipt";
+          farmerNameElement.innerHTML = "Farmer Name: " + farmerName;
+          farmerIdElement.innerHTML = "Farmer ID: " + farmer.farmerId;
+          coffeeTypeElement.innerHTML = "Coffee Type: " + coffeeType;
+          amountElement.innerHTML = "Amount (kg): " + amount;
+          dateElement.innerHTML = "Date/Time: " + currentDateTime;
+          totalAmountElement.innerHTML = "Total Amount: " + (parseFloat(amount) + parseFloat(farmer.totalCoffee || 0)) + " kg";
+          amountBroughtTodayElement.innerHTML = "Amount Brought Today: " + amount + " kg";
+    
+          document.getElementById("receipt").style.display = "block";
+    
+          // Update farmer's total coffee amount in the Realtime Database
+          farmer.totalCoffee = (parseFloat(amount) + parseFloat(farmer.totalCoffee || 0)).toFixed(2);
+          database.ref("farmers/" + farmer.farmerId).set(farmer);
+        } else {
+          alert("Farmer not found!");
+        }
+      });
+    
+      // Reset the form
+      document.getElementById("transactionForm").reset();
+    });
+  </script>
+</body>
+</html>

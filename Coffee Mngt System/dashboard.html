@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        body::before {
+      content: "";
+      background-image: url(/logo2.png);
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      opacity: 0.5; /* Set the opacity of the background image */
+      position: absolute;
+      top: 50%;
+      left: 20%;
+      width: 50%;
+      height: 50%;
+      z-index: -1; /* Place the pseudo-element behind the content */}
+
+   
+
+        #content {
+            /* margin-left: 250px; */
+            padding: 20px;
+        }
+
+        .statistics-card {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin: 10px;
+        }
+
+        .statistics-card h1 {
+            font-size: 36px;
+            margin: 0;
+            color: #333;
+        }
+
+        .statistics-card h3 {
+            font-size: 16px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">
+            <img src="/logo2.png" width="50" height="50" class="d-inline-block align-top" alt="Logo">
+          </a>
+        <a class="navbar-brand" href="#">Coffee Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="landingpage.html">Home </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="dashboard.html">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="register.html">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="record.html">Transact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="registeredfarmers.html">Farmers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="editfarmersdetails.html">Farmer Edit</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="statement.html">Find Statement</a>
+                </li>
+
+                <!-- Add more navigation links here -->
+            </ul>
+        </div>
+    </nav>
+
+    <div id="content">
+        <h1>Coffee Factory Dashboard</h1>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="statistics-card">
+                    <h1 id="registeredFarmersCount">0</h1>
+                    <h3>Registered Farmers</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="statistics-card">
+                    <h1 id="highestAmount">0 kg</h1>
+                    <h3>Highest Amount (Today)</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="statistics-card">
+                    <h1 id="totalAmount">0 kg</h1>
+                    <h3>Total Amount in Factory</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="statistics-card">
+                    <h1 id="collectedToday">0 kg</h1>
+                    <h3>Amount Collected Today</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- Firebase initialization and data retrieval script -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+    <script>
+        // Your Firebase configuration
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyAJ5Ny4cGhDRD9MB9as2_iGqlX7weecr_c",
+  authDomain: "knec-project-2023.firebaseapp.com",
+  databaseURL: "https://knec-project-2023-default-rtdb.firebaseio.com",
+  projectId: "knec-project-2023",
+  storageBucket: "knec-project-2023.appspot.com",
+  messagingSenderId: "127489664392",
+  appId: "1:127489664392:web:7509fe724fbf7da61a463d",
+  measurementId: "G-52NF6HECW5"
+};
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Retrieve data from Firebase Realtime Database
+        const database = firebase.database();
+
+        database.ref("farmers").on("value", (snapshot) => {
+            const farmers = snapshot.val() || {};
+
+            // Calculate the number of registered farmers
+            const registeredFarmersCount = Object.keys(farmers).length;
+
+            // Calculate the highest amount brought today
+            let highestAmountToday = 0;
+
+            // Calculate the total amount in the factory and amount collected today
+            let totalAmountInFactory = 0;
+            let collectedTodayAmount = 0;
+
+            const today = new Date().toLocaleDateString('en-US');
+
+            Object.values(farmers).forEach((farmer) => {
+                if (farmer.transactions) {
+                    Object.values(farmer.transactions).forEach((transaction) => {
+                        const amount = parseFloat(transaction.amount);
+
+                        if (transaction.date === today) {
+                            if (amount > highestAmountToday) {
+                                highestAmountToday = amount;
+                            }
+
+                            collectedTodayAmount += amount;
+                        }
+
+                        totalAmountInFactory += amount;
+                    });
+                }
+            });
+
+            // Update the DOM with the fetched data
+            document.getElementById("registeredFarmersCount").textContent = registeredFarmersCount;
+            document.getElementById("highestAmount").textContent = highestAmountToday.toFixed(2) + " kg";
+            document.getElementById("totalAmount").textContent = totalAmountInFactory.toFixed(2) + " kg";
+            document.getElementById("collectedToday").textContent = collectedTodayAmount.toFixed(2) + " kg";
+        });
+    </script>
+</body>
+</html>
