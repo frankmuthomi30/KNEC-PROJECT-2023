@@ -2,6 +2,10 @@
 <html>
 <head>
   <title>Thiriku Coffee Factory</title>
+  <!-- Include Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Include the updated Typed.js script reference -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.10/typed.js" integrity="sha512-tQQXRDB2wEmuJGtFrmmoFYzNTq8StA1XJrfO0OQbbTxd9G0CwaTDL6/C1y805IlvBVrMwOqob1kf6r/2U5XXVg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     body {
       margin: 0;
@@ -58,9 +62,24 @@
 <body>
   <div class="container">
     <img src="/logo2.png" alt="Thiriku Coffee Factory" class="logo">
-    <h1>Welcome to Thiriku Coffee Factory</h1>
+    <!-- Use a span element with an ID for Typed.js to target -->
+    <h1><span id="typed-text"></span></h1>
     <p>Experience the finest coffee from Nyeri, Kenya.</p>
-    <a href="dashboard.html" class="cta-button">Enter</a>
+    <a href="login.html" class="cta-button">Enter</a>
   </div>
+
+  <!-- Include Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <!-- Initialize Typed.js -->
+  <script>
+    var options = {
+      strings: ["Welcome to Thiriku Coffee Factory"],
+      typeSpeed: 50 // typing speed in milliseconds
+    };
+
+    var typed = new Typed("#typed-text", options);
+  </script>
 </body>
 </html>
